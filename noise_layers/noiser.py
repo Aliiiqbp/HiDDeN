@@ -3,6 +3,7 @@ import torch.nn as nn
 from noise_layers.identity import Identity
 from noise_layers.jpeg_compression import JpegCompression
 from noise_layers.quantization import Quantization
+from noise_layers.gaussian import Gaussian
 
 
 class Noiser(nn.Module):
@@ -19,6 +20,8 @@ class Noiser(nn.Module):
                     self.noise_layers.append(JpegCompression(device))
                 elif layer == 'QuantizationPlaceholder':
                     self.noise_layers.append(Quantization(device))
+                elif layer == 'Gaussian':
+                    self.noise_layers.append(Gaussian(device))
                 else:
                     raise ValueError(f'Wrong layer placeholder string in Noiser.__init__().'
                                      f' Expected "JpegPlaceholder" or "QuantizationPlaceholder" but got {layer} instead')

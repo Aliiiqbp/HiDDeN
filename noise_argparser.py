@@ -5,6 +5,7 @@ from noise_layers.crop import Crop
 from noise_layers.identity import Identity
 from noise_layers.dropout import Dropout
 from noise_layers.resize import Resize
+from noise_layers.gaussian import Gaussian
 from noise_layers.quantization import Quantization
 from noise_layers.jpeg_compression import JpegCompression
 
@@ -102,6 +103,8 @@ class NoiseArgParser(argparse.Action):
             elif command[:len('identity')] == 'identity':
                 # We are adding one Identity() layer in Noiser anyway
                 pass
+            elif command[:len('gaussian')] == 'gaussian':
+                layers.append('Gaussian')
             else:
                 raise ValueError('Command not recognized: \n{}'.format(command))
         setattr(namespace, self.dest, layers)
