@@ -1,15 +1,40 @@
+import cv2
 import os
 import time
 import torch
 import numpy as np
 import utils
 import logging
-from collections import defaultdict
 
+from pytorch_msssim import ssim, ms_ssim, SSIM, MS_SSIM
+from torch import nn
+from collections import defaultdict
+from math import log10, sqrt
 from options import *
 from model.hidden import Hidden
 from average_meter import AverageMeter
 
+
+def PSNR(img1, img2):
+    img1, img2 = torch.flatten(img1), torch.flatten(img2)
+    mse = torch.dot((img1 - img2), (img1 - img2)) #.item() ** 2
+    mse = mse.sum().item()
+    if(mse == 0):
+        return 100
+    max_pixel = 255.0
+    psnr = 20 * log10(max_pixel / sqrt(mse / 12))
+    return psnr
+    
+
+def avg_bit_acc(msg1, msg2):
+    msg1, msg2 = torch.flatten(msg1), torch.flatten(msg2)
+    sub = torch.abs(msg1 - msg2)
+    for idx in range(sub.size(dim=0)):
+	    sub[idx] = 1 if sub[idx] > 0.5 else 0
+    lenght = sub.size(dim=0)
+    return ((lenght - sub.sum().item()) / lenght) * 100
+    
+    
 
 def train(model: Hidden,
           device: torch.device,
@@ -73,10 +98,21 @@ def train(model: Hidden,
         first_iteration = True
         validation_losses = defaultdict(AverageMeter)
         logging.info('Running validation for epoch {}/{}'.format(epoch, train_options.number_of_epochs))
+        psnr_sum, avg_bit_sum, ssim_sum, cnt = 0, 0, 0, 0
         for image, _ in val_data:
             image = image.to(device)
             message = torch.Tensor(np.random.choice([0, 1], (image.shape[0], hidden_config.message_length))).to(device)
             losses, (encoded_images, noised_images, decoded_messages) = model.validate_on_batch([image, message])
+
+
+
+            cnt += 1
+            psnr_sum += PSNR(image, encoded_images)
+            avg_bit_sum += avg_bit_acc(message, decoded_messages)
+#            ssim_sum += ssim(image, encoded_images, data_range=255, size_average=False)
+
+
+
             for name, loss in losses.items():
                 validation_losses[name].update(loss)
             if first_iteration:
@@ -88,7 +124,10 @@ def train(model: Hidden,
                                   epoch,
                                   os.path.join(this_run_folder, 'images'), resize_to=saved_images_size)
                 first_iteration = False
-
+        
+        print("psnr: ", psnr_sum / cnt)
+        print("avg bit: ", avg_bit_sum / cnt)
+#        print("ssim: ", ssim_sum / cnt)
         utils.log_progress(validation_losses)
         logging.info('-' * 40)
         utils.save_checkpoint(model, train_options.experiment_name, epoch, os.path.join(this_run_folder, 'checkpoints'))
