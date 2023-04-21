@@ -32,7 +32,7 @@ def main():
     parser.add_argument('--data-dir', '-d', required=True, type=str, help='The directory where the data is stored.')
     parser.add_argument('--runs_root', '-r', default=os.path.join('.', 'experiments'), type=str,
                         help='The root folder where data about experiments are stored.')
-    parser.add_argument('--batch-size', '-b', default=1, type=int, help='Validation batch size.')
+    parser.add_argument('--batch-size', '-b', default=12, type=int, help='Validation batch size.')
 
     args = parser.parse_args()
     print_each = 25

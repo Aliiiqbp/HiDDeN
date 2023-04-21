@@ -8,7 +8,7 @@ from noise_layers.resize import Resize
 from noise_layers.gaussian import Gaussian
 from noise_layers.quantization import Quantization
 from noise_layers.jpeg_compression import JpegCompression
-
+from noise_layers.gaussianblur import GaussianBlur
 
 def parse_pair(match_groups):
     heights = match_groups[0].split(',')
@@ -105,6 +105,10 @@ class NoiseArgParser(argparse.Action):
                 pass
             elif command[:len('gaussian')] == 'gaussian':
                 layers.append('Gaussian')
+            elif command[:len('gaussiaanblur')] == 'gaussiaanblur':
+                layers.append('GaussianBlur')
+            elif command[:len('saltpepper')] == 'saltpepper':
+                layers.append('SaltPepper')
             else:
                 raise ValueError('Command not recognized: \n{}'.format(command))
         setattr(namespace, self.dest, layers)
