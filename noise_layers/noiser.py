@@ -78,9 +78,10 @@ class Noiser(nn.Module):
 #        encoded_and_cover[1] = convert_to_comp(encoded_and_cover[1], comp_type = "Compression").to(self.device)
 #        print("real jpeg")
 
-#        random_noise_layer = np.random.choice(self.noise_layers, 1)[0]
-        print(self.noise_layers[5])
-        return self.noise_layers[5](encoded_and_cover)
-#        return random_noise_layer(encoded_and_cover)
+        random_noise_layer = np.random.choice(self.noise_layers, 1)[0]
+        print(random_noise_layer)
+        #print(self.noise_layers[5])
+        #return self.noise_layers[5](encoded_and_cover)
+        return random_noise_layer(encoded_and_cover)
 #        return encoded_and_cover
 
